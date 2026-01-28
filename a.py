@@ -3,38 +3,38 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 try:
-    print("Chargement du fichier...")
+    print("Loading file...")
     df = pd.read_csv('resultats_analyse.csv')
     df = df.drop_duplicates(subset=['slug'])
-    print(f"Données chargées : {len(df)} marchés uniques.")
+    print(f"Data loaded: {len(df)} unique markets.")
 
 except FileNotFoundError:
-    print("Erreur : Le fichier 'resultats_analyse.csv' est introuvable.")
+    print("Error: The file 'resultats_analyse.csv' was not found.")
     exit()
 
 def categorize_domain(row):
     text = (str(row['question']) + " " + str(row['slug'])).lower()
     
     if any(x in text for x in ['nfl', 'nba', 'football', 'soccer', 'tennis', 'super bowl', 'league', 'cup', 'winner', 'match', 'vs.', 'f1', 'prix']):
-        return 'Sport'
+        return 'Sports'
     
     if any(x in text for x in ['bitcoin', 'btc', 'eth', 'solana', 'crypto', 'token', 'nft', 'wallet', 'chain', 'price of']):
         if 'bitcoin' in text or 'eth' in text or 'solana' in text or 'crypto' in text:
             return 'Crypto'
             
     if any(x in text for x in ['trump', 'biden', 'harris', 'election', 'vote', 'president', 'nominate', 'senate', 'house', 'republican', 'democrat']):
-        return 'Politique (USA)'
+        return 'Politics (USA)'
         
     if any(x in text for x in ['war', 'strike', 'israel', 'iran', 'gaza', 'ukraine', 'russia', 'china', 'maduro', 'venezuela', 'military', 'invasion', 'ceasefire']):
-        return 'Géopolitique'
+        return 'Geopolitics'
         
     if any(x in text for x in ['fed', 'rate', 'inflation', 's&p', 'spx', 'nasdaq', 'stock', 'earnings', 'recession', 'bank', 'economy', 'shutdown']):
-        return 'Économie'
+        return 'Economy'
         
     if any(x in text for x in ['tweet', 'twitter', 'elon', 'musk', 'movie', 'song', 'spotify', 'grammy', 'oscar', 'award', 'weather']):
         return 'Culture & Tech'
         
-    return 'Autre'
+    return 'Other'
 
 df['domain'] = df.apply(categorize_domain, axis=1)
 
@@ -55,12 +55,12 @@ colors = sns.color_palette("pastel")
 
 axes[0].pie(stats['daily_reward_usdc'], labels=stats.index, autopct='%1.1f%%', startangle=140, colors=colors, pctdistance=0.85)
 axes[0].add_artist(plt.Circle((0,0),0.70,fc='white')) 
-axes[0].set_title('Où Polymarket paie-t-il ?\n(Part des Rewards/Salaires)', fontsize=14, fontweight='bold')
+axes[0].set_title('Where does Polymarket pay?\n(Rewards/Salaries Share)', fontsize=14, fontweight='bold')
 
 stats_vol = stats.sort_values('total_volume', ascending=False)
 axes[1].pie(stats_vol['total_volume'], labels=stats_vol.index, autopct='%1.1f%%', startangle=140, colors=colors, pctdistance=0.85)
 axes[1].add_artist(plt.Circle((0,0),0.70,fc='white'))
-axes[1].set_title('Où sont les parieurs ?\n(Part du Volume Total)', fontsize=14, fontweight='bold')
+axes[1].set_title('Where are the bettors?\n(Total Volume Share)', fontsize=14, fontweight='bold')
 
 plt.tight_layout()
 plt.show()
@@ -72,9 +72,9 @@ stats_spread = stats.sort_values('est_spread_revenue', ascending=False)
 
 barplot = sns.barplot(x=stats_spread['est_spread_revenue'], y=stats_spread.index, palette="viridis")
 
-plt.title('Répartition des Gains de Spread Estimés ($/jour)\n(La "Prime de Risque")', fontsize=16, fontweight='bold')
-plt.xlabel('Revenu Journalier Estimé (USDC)', fontsize=12)
-plt.ylabel('Domaine', fontsize=12)
+plt.title('Estimated Spread Revenue Distribution ($/day)\n(The "Risk Premium")', fontsize=16, fontweight='bold')
+plt.xlabel('Estimated Daily Revenue (USDC)', fontsize=12)
+plt.ylabel('Domain', fontsize=12)
 
 for i, v in enumerate(stats_spread['est_spread_revenue']):
     barplot.text(v + (v * 0.01), i, f" ${v:,.0f}", color='black', va='center', fontweight='bold')
@@ -82,4 +82,3 @@ for i, v in enumerate(stats_spread['est_spread_revenue']):
 plt.tight_layout()
 plt.show()
 
-print("Graphiques générés avec succès !")
