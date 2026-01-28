@@ -3,10 +3,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
-# Determiner le dossier où se trouve ce script
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Liste des noms de fichiers possibles (du plus récent au plus ancien)
 possible_files = ['analysis_results.csv', 'resultats_analyse.csv']
 file_path = None
 
@@ -17,7 +15,6 @@ for fname in possible_files:
         break
 
 if not file_path:
-    # Fallback : chercher dans le dossier parent si non trouvé
     for fname in possible_files:
         temp_path = os.path.join(script_dir, '..', fname)
         if os.path.exists(temp_path):
@@ -71,41 +68,42 @@ stats = df.groupby('domain').agg({
     'est_spread_revenue': 'sum'
 }).sort_values('daily_reward_usdc', ascending=False)
 
-fig1, axes = plt.subplots(1, 2, figsize=(16, 8))
+fig1, axes = plt.subplots(1, 2, figsize=(18, 10))
 colors = sns.color_palette("pastel")
 
 axes[0].pie(stats['daily_reward_usdc'], labels=stats.index, autopct='%1.1f%%', startangle=140, colors=colors, pctdistance=0.85)
 axes[0].add_artist(plt.Circle((0,0),0.70,fc='white')) 
-axes[0].set_title('Market Share (Salaries / Rewards)', fontsize=14, fontweight='bold')
+axes[0].set_title('Market Share (Salaries / Rewards)', fontsize=16, fontweight='bold', pad=20)
 
 stats_vol = stats.sort_values('total_volume', ascending=False)
 axes[1].pie(stats_vol['total_volume'], labels=stats_vol.index, autopct='%1.1f%%', startangle=140, colors=colors, pctdistance=0.85)
 axes[1].add_artist(plt.Circle((0,0),0.70,fc='white'))
-axes[1].set_title('Volume Share (Total Activity)', fontsize=14, fontweight='bold')
+axes[1].set_title('Volume Share (Total Activity)', fontsize=16, fontweight='bold', pad=20)
 
+plt.subplots_adjust(top=0.85)
 img_path1 = os.path.join(script_dir, 'market_share_english.png')
-plt.tight_layout()
-plt.savefig(img_path1)
-# plt.show() # Commented out to prevent blocking script
+plt.savefig(img_path1, bbox_inches='tight', pad_inches=0.2)
 
-plt.figure(figsize=(12, 6))
+plt.figure(figsize=(14, 8))
 sns.set_theme(style="whitegrid")
 
 stats_spread = stats.sort_values('est_spread_revenue', ascending=False)
 
 barplot = sns.barplot(x=stats_spread['est_spread_revenue'], y=stats_spread.index, palette="viridis")
 
-plt.title('Estimated Spread Revenue by Domain ($/day)', fontsize=16, fontweight='bold')
-plt.xlabel('Estimated Daily Revenue (USDC)', fontsize=12)
-plt.ylabel('Domain', fontsize=12)
+max_val = stats_spread['est_spread_revenue'].max()
+plt.xlim(0, max_val * 1.2)
+
+plt.title('Estimated Spread Revenue by Domain ($/day)', fontsize=18, fontweight='bold', pad=20)
+plt.xlabel('Estimated Daily Revenue (USDC)', fontsize=14)
+plt.ylabel('Domain', fontsize=14)
 
 for i, v in enumerate(stats_spread['est_spread_revenue']):
-    barplot.text(v + (v * 0.01), i, f" ${v:,.0f}", color='black', va='center', fontweight='bold')
+    barplot.text(v + (v * 0.01), i, f" ${v:,.0f}", color='black', va='center', fontweight='bold', fontsize=11)
 
-img_path2 = os.path.join(script_dir, 'spread_revenue_english.png')
 plt.tight_layout()
-plt.savefig(img_path2)
-# plt.show()
+img_path2 = os.path.join(script_dir, 'spread_revenue_english.png')
+plt.savefig(img_path2, bbox_inches='tight', pad_inches=0.2)
 
 print("Charts generated successfully:")
 print(f"1. {img_path1}")
